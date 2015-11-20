@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+
+	<!-- DB설정이니 건들지마시오////////////////////////////////////// -->
+	
+	<!-- 패키지 스캔 -->
+	<context:component-scan base-package="kr.pe.tippingpoint"/>
+	
+	<!-- SqlsessionTemplate 설정 -->
+	<bean name="SqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate"
+		c:sqlSessionFactory-ref="SqlSessionFactoryBean" />
+	<!-- sqlsessionFactroybean 설정 -->
+	<bean name="SqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean"
+				p:configLocation="classpath:/kr/pe/tippingpoint/mybatis/mybatis-config.xml"
+				p:dataSource-ref="BasicDataSource"/>
+	<!-- basic data source BEAN 객체 -->
+	<bean name="BasicDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@127.0.0.1:1521:XE" />
+		<property name="username" value="tippingpoint" />
+		<property name="password" value="1592" />
+		<property name="maxTotal" value="50" />
+	</bean>
+
+	
+
+	
+	
+	<!-- ///////////////////////////////////////////////////// -->
+
+
+	<!-- multipartResolver를 bean으로 등록 - 역할 : 요청방식post이고 encype이 multipart/form-data 
+		인 경우 업로드 된 파일 관련 처리를 해주는 bean - 호출 시점 : handler 호출 하기 전에 먼저 호출이 된다. - bean으로 
+		등록 시 빈 식별자(id/name)은 mulitipartResolver로 한다. -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+
+	<!-- View Resolver 관련 설정 -->
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver"
+		p:order="1" />
+	<bean class="org.springframework.web.servlet.view.tiles3.TilesViewResolver"
+		p:order="2"/>
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:order="3" />
+	<!-- 원래 디폴트 값이지만 viewResolver를 하나라도 등록하면 bean으로 등록해주어야 사용가능하다. -->
+
+	<!-- Tiles 설정 -->
+	<!-- TilesConfiurer bean 등록 : tiles 설정파일의 위치 등록 -->
+	<bean name="tilesConfigurer"
+		class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/config/tiles/tiles-defs.xml</value>
+			</list>
+		</property>
+	</bean>
+	
+
+	<!-- mvc 설정 -->
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter"
+				c:defaultCharset="UTF-8" />
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	<!-- 메인페이지 -->
+	<mvc:view-controller path="/index.tp" view-name="index.index" />
+	<!-- 회원가입 페이지 -->
+	<mvc:view-controller path="/tpfunder/register_form.tp" view-name="tpfunder/register_member.tiles"/>
+	<!-- 로그인 페이지 -->
+	<mvc:view-controller path="/login/login.tp" view-name="login/loginpage.tiles"/> 
+	<!-- 로그인 체크 -->
+	<mvc:view-controller path="/loginSucces.tp" view-name="classpath:"/>
+	<mvc:view-controller path="/page1.tp" view-name="login/page1.tiles"/>
+	<mvc:view-controller path="/page2.tp" view-name="login/page2.tiles"/>
+	
+	
+	<!-- 관리자 페이지  --> 
+	<mvc:view-controller path="/admin/list.tp" view-name="administrator/admin_funderList.tiles"/>
+	
+	
+	
+	<!-- <인터셉터 설정 -->
+<!-- 	<mvc:interceptors>
+		<mvc:interceptor>
+		 path : ANT 패턴
+					* : 글자수 상관없이 모든 글자
+					? :	1글자
+					**: 경로에 사용. 자신을포함한 모든 하위경로
+					/**/login/**/* : 경로에 login만 들어가면 된다.
+					
+			<mvc:mapping path="/**/login/**/*"/>
+			<bean class="kr.pe.tippingpoint.interceptor.LoginCheckInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>	 -->
+
+</beans>
